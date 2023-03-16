@@ -29,10 +29,10 @@ func TestInorderInOrder(t *testing.T) {
 		i++
 	}
 
-	last := -1
+	last := 101
 	n := 0
 	tree.Inorder(func(mi *MoveInfo) {
-		if mi.eval <= last {
+		if mi.eval > last {
 			t.Errorf("Wrong order: %d", mi.eval)
 		}
 		last = mi.eval
@@ -52,10 +52,10 @@ func TestInOrderRandomOrder(t *testing.T) {
 		added++
 	}
 
-	last := -101
+	last := 101
 	n := 0
 	tree.Inorder(func(mi *MoveInfo) {
-		if mi.eval < last {
+		if mi.eval > last {
 			t.Errorf("Wrong order: %d", mi.eval)
 		}
 		last = mi.eval
@@ -76,10 +76,10 @@ func TestInorderReverseOrder(t *testing.T) {
 		added++
 	}
 
-	last := -1
+	last := 101
 	n := 0
 	tree.Inorder(func(mi *MoveInfo) {
-		if mi.eval <= last {
+		if mi.eval > last {
 			t.Errorf("Wrong order: %d", mi.eval)
 		}
 		last = mi.eval
