@@ -1,62 +1,78 @@
 package main
 
-import "github.com/notnil/chess"
+import (
+	"math"
+
+	"github.com/notnil/chess"
+)
 
 type SearchTree struct {
-	value       *MoveInfo
-	left, right *SearchTree
+	position *chess.Position
+	move     *chess.Move
+	eval     int
+	cutoff   bool
+	children []*SearchTree
 }
 
-type MoveInfo struct {
-	move *chess.Move
-	eval int
+func (tree *SearchTree) AddChild(child *SearchTree) {
+	tree.children = append(tree.children, child)
 }
 
-func append(tree *SearchTree, value *MoveInfo) *SearchTree {
-	if tree == nil || tree.value == nil {
-		return &SearchTree{value, nil, nil}
+func (tree *SearchTree) Expand(depth int) {
+	if depth == 0 {
+		return
 	}
-
-	if value.eval <= tree.value.eval {
-		return &SearchTree{tree.value, tree.left, append(tree.right, value)}
-	}
-	return &SearchTree{tree.value, append(tree.left, value), tree.right}
-}
-
-func (tree *SearchTree) Preorder(f func(*MoveInfo)) {
-	if tree != nil && tree.value != nil {
-		f(tree.value)
-		tree.left.Preorder(f)
-		tree.right.Preorder(f)
+	for _, move := range tree.position.ValidMoves() {
+		child := &SearchTree{position: tree.position.Update(move), move: move}
+		child.Expand(depth - 1)
+		tree.AddChild(child)
 	}
 }
 
-func (tree *SearchTree) Inorder(f func(*MoveInfo)) {
-	if tree != nil && tree.value != nil {
-		tree.left.Inorder(f)
-		f(tree.value)
-		tree.right.Inorder(f)
+func (tree *SearchTree) AlphaBetaExpand(evalf func(*chess.Position) int, depth int) {
+	alpha := math.MinInt + 2
+	beta := math.MaxInt - 2
+	if tree.position.Turn() == chess.Black {
+		alpha, beta = -beta, -alpha
 	}
+
+	tree.AlphaBetaStep(evalf, alpha, beta, depth, make(map[[16]byte]int))
 }
 
-func (tree *SearchTree) Postorder(f func(*MoveInfo)) {
-	if tree != nil && tree.value != nil {
-		tree.left.Postorder(f)
-		tree.right.Postorder(f)
-		f(tree.value)
+func (tree *SearchTree) AlphaBetaStep(evalf func(*chess.Position) int, alpha, beta, depth int, ttable map[[16]byte]int) int {
+	if depth == 0 {
+		return evalf(tree.position)
 	}
+
+	tree.Expand(1)
+	for _, child := range tree.children {
+		hash := tree.position.Hash()
+		if val, ok := ttable[hash]; ok {
+			child.eval = val
+		} else {
+			child.eval = -child.AlphaBetaStep(evalf, -beta, -alpha, depth-1, ttable)
+			ttable[hash] = child.eval
+		}
+
+		if child.eval >= beta {
+			child.cutoff = true
+			return beta
+		}
+		if child.eval > alpha {
+			alpha = child.eval
+		}
+	}
+	return alpha
 }
 
-func (tree *SearchTree) getRightmost() *MoveInfo {
-	if tree.right != nil {
-		return tree.right.getRightmost()
-	}
-	return tree.value
-}
+func (tree *SearchTree) BestChild() *SearchTree {
+	best := tree.children[0]
 
-func (tree *SearchTree) getLeftmost() *MoveInfo {
-	if tree.left != nil {
-		return tree.left.getLeftmost()
+	for _, child := range tree.children {
+		if child.eval > best.eval {
+			best = child
+		}
 	}
-	return tree.value
+
+	return best
 }
