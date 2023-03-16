@@ -46,7 +46,7 @@ func (tree *SearchTree) AlphaBetaStep(evalf func(*chess.Position) int, alpha, be
 
 	tree.Expand(1)
 	for _, child := range tree.children {
-		hash := tree.position.Hash()
+		hash := child.position.Hash()
 		if val, ok := ttable[hash]; ok {
 			child.eval = val
 		} else {

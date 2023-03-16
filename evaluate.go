@@ -1,53 +1,47 @@
 package main
 
-import "github.com/notnil/chess"
+import (
+	"github.com/notnil/chess"
+)
+
+var PIECE_VALUE = map[chess.PieceType]int{
+	chess.Pawn:   100,
+	chess.Bishop: 300,
+	chess.Knight: 300,
+	chess.Rook:   500,
+	chess.Queen:  900,
+	chess.King:   1000,
+}
+
+var PIECE_MAX_MOVES = map[chess.PieceType]int{
+	chess.Pawn:   2,
+	chess.Bishop: 13,
+	chess.Knight: 8,
+	chess.Rook:   14,
+	chess.Queen:  27,
+	chess.King:   8,
+}
+
+func mobilityWeight(position *chess.Position, square *chess.Square, piece *chess.Piece) int {
+
+}
 
 func material(position *chess.Position) int {
 	score := 0
-	for _, p := range position.Board().SquareMap() {
-		value := 0
-		switch p.Type() {
-		case chess.Pawn:
-			value += 100
-		case chess.Bishop:
-			value += 300
-		case chess.Knight:
-			value += 300
-		case chess.Rook:
-			value += 500
-		case chess.Queen:
-			value += 900
-		case chess.King:
-			value += 200
-		}
-		if p.Color() == chess.Black {
-			score -= value
-			continue
+
+	for square, piece := range position.Board().Rotate().SquareMap() {
+		value := PIECE_VALUE[piece.Type()] * mobilityWeight(position, &square, &piece)
+		if piece.Color() == chess.Black {
+			value = -value
 		}
 		score += value
 	}
-	return score
-}
-
-// TODO per piece
-func mobility(position *chess.Position) int {
-	score := 0
-	mod := 1
-
-	if position.Turn() == chess.Black {
-		mod = -mod
-	}
-
-	score += len(position.ValidMoves()) * mod
-	flip := FlipSide(position)
-	mod = -mod
-	score += len(flip.ValidMoves()) * mod
 
 	return score
 }
 
 func evaluate(position *chess.Position) int {
-	score := material(position) + mobility(position)
+	score := material(position)
 
 	if position.Turn() == chess.Black {
 		score = -score

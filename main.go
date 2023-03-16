@@ -17,7 +17,7 @@ func main() {
 		tree := &SearchTree{position: game.Position()}
 
 		start := time.Now()
-		tree.AlphaBetaExpand(evaluate, 4)
+		tree.AlphaBetaExpand(evaluate, depth)
 		best := tree.BestChild()
 		end := time.Now()
 
