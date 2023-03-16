@@ -11,7 +11,7 @@ func ShowBoard(game *chess.Game, eval int) {
 		eval = -eval // negamax
 	}
 	fmt.Println(game.Position().Board().Draw())
-	fmt.Printf(game.String())
+	fmt.Print(game.String())
 	fmt.Printf("eval: %d\n", eval)
 }
 
@@ -21,11 +21,11 @@ func main() {
 
 	// generate moves until game is over
 	for game.Outcome() == chess.NoOutcome {
-		move, score := Search(game.Position(), 4)
+		info := iterSearch(game.Position(), 4)
 
-		game.Move(move)
+		game.Move(info.value.move)
 		if pause {
-			ShowBoard(game, score)
+			ShowBoard(game, info.value.eval)
 			var val string
 			fmt.Scanln(&val)
 
