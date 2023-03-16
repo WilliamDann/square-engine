@@ -10,21 +10,28 @@ import (
 func main() {
 	game := chess.NewGame()
 	pause := true
+	depth := 4
 
 	// generate moves until game is over
 	for game.Outcome() == chess.NoOutcome {
+		tree := &SearchTree{position: game.Position()}
+
 		start := time.Now()
-		info := iterSearch(game.Position(), 5)
+		tree.AlphaBetaExpand(evaluate, 4)
+		best := tree.BestChild()
 		end := time.Now()
 
-		game.Move(info.value.move)
+		game.Move(best.move)
 		if pause {
+			eval := best.eval / 100
 			if game.Position().Turn() == chess.Black {
-				info.value.eval = -info.value.eval // negamax
+				eval = -eval // negamax
 			}
+
 			fmt.Println(game.Position().Board().Draw())
 			fmt.Print(game.String())
-			fmt.Printf("\neval: %d\n", info.value.eval)
+			fmt.Printf("\ndepth: %d", depth)
+			fmt.Printf("\neval: %d\n", eval)
 			fmt.Printf("time: %.3fs\n", end.Sub(start).Seconds())
 
 			var val string
@@ -38,6 +45,7 @@ func main() {
 			}
 		} else {
 			fmt.Print(game.String())
+			fmt.Printf("\ntime: %.3fs", end.Sub(start).Seconds())
 		}
 	}
 

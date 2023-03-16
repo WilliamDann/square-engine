@@ -38,8 +38,8 @@ func material(position *chess.Position) int {
 // TODO per piece
 func mobility(position *chess.Position) int {
 	score := 0
-
 	mod := 1
+
 	if position.Turn() == chess.Black {
 		mod = -mod
 	}
@@ -47,7 +47,7 @@ func mobility(position *chess.Position) int {
 	score += len(position.ValidMoves()) * mod
 	flip := FlipSide(position)
 	mod = -mod
-	score -= len(flip.ValidMoves()) * mod
+	score += len(flip.ValidMoves()) * mod
 
 	return score
 }
