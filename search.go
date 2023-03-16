@@ -12,7 +12,7 @@ func iterSearch(position *chess.Position, depth int) *SearchTree {
 		tree = append(tree, &MoveInfo{move, 0})
 	}
 
-	for i := 1; i < depth; i++ {
+	for i := 1; i <= depth; i++ {
 		tree = alphaBeta(position, tree, i)
 	}
 

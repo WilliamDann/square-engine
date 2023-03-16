@@ -17,7 +17,7 @@ func append(tree *SearchTree, value *MoveInfo) *SearchTree {
 		return &SearchTree{value, nil, nil}
 	}
 
-	if value.eval >= tree.value.eval {
+	if value.eval <= tree.value.eval {
 		return &SearchTree{tree.value, tree.left, append(tree.right, value)}
 	}
 	return &SearchTree{tree.value, append(tree.left, value), tree.right}
@@ -45,4 +45,18 @@ func (tree *SearchTree) Postorder(f func(*MoveInfo)) {
 		tree.right.Postorder(f)
 		f(tree.value)
 	}
+}
+
+func (tree *SearchTree) getRightmost() *MoveInfo {
+	if tree.right != nil {
+		return tree.right.getRightmost()
+	}
+	return tree.value
+}
+
+func (tree *SearchTree) getLeftmost() *MoveInfo {
+	if tree.left != nil {
+		return tree.left.getLeftmost()
+	}
+	return tree.value
 }

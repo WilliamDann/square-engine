@@ -2,18 +2,10 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/notnil/chess"
 )
-
-func ShowBoard(game *chess.Game, eval int) {
-	if game.Position().Turn() == chess.Black {
-		eval = -eval // negamax
-	}
-	fmt.Println(game.Position().Board().Draw())
-	fmt.Print(game.String())
-	fmt.Printf("eval: %d\n", eval)
-}
 
 func main() {
 	game := chess.NewGame()
@@ -21,11 +13,20 @@ func main() {
 
 	// generate moves until game is over
 	for game.Outcome() == chess.NoOutcome {
-		info := iterSearch(game.Position(), 4)
+		start := time.Now()
+		info := iterSearch(game.Position(), 5)
+		end := time.Now()
 
 		game.Move(info.value.move)
 		if pause {
-			ShowBoard(game, info.value.eval)
+			if game.Position().Turn() == chess.Black {
+				info.value.eval = -info.value.eval // negamax
+			}
+			fmt.Println(game.Position().Board().Draw())
+			fmt.Print(game.String())
+			fmt.Printf("\neval: %d\n", info.value.eval)
+			fmt.Printf("time: %.3fs\n", end.Sub(start).Seconds())
+
 			var val string
 			fmt.Scanln(&val)
 
