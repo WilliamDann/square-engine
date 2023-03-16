@@ -6,35 +6,48 @@ import (
 	"github.com/notnil/chess"
 )
 
-func Search(position *chess.Position, depth int) (*chess.Move, int) {
+func iterSearch(position *chess.Position, depth int) *SearchTree {
+	tree := &SearchTree{}
+	for _, move := range position.ValidMoves() {
+		tree = append(tree, &MoveInfo{move, 0})
+	}
+
+	for i := 1; i <= depth; i++ {
+		tree = alphaBeta(position, tree, i)
+	}
+
+	return tree
+}
+
+func alphaBeta(position *chess.Position, moves *SearchTree, depth int) *SearchTree {
 	alpha := math.MinInt + 2
 	beta := math.MaxInt - 2
+	tree := &SearchTree{}
 
 	if position.Turn() == chess.Black {
 		alpha, beta = -beta, -alpha
 	}
 
-	var bestMove *chess.Move
-	for _, move := range position.ValidMoves() {
-		score := -alphaBeta(position.Update(move), -beta, -alpha, depth-1)
+	moves.Inorder(func(move *MoveInfo) {
+		score := -alphaBetaStep(position.Update(move.move), -beta, -alpha, depth-1)
+		tree = append(tree, &MoveInfo{move.move, score})
 		if score >= beta {
-			return move, beta //  fail hard beta-cutoff
+			return
 		}
 		if score > alpha {
-			alpha = score // alpha acts like max in MiniMax
-			bestMove = move
+			alpha = score
 		}
-	}
+	})
 
-	return bestMove, alpha
+	return tree
 }
 
-func alphaBeta(position *chess.Position, alpha int, beta int, depthleft int) int {
+func alphaBetaStep(position *chess.Position, alpha int, beta int, depthleft int) int {
 	if depthleft == 0 {
 		return evaluate(position)
 	}
 	for _, move := range position.ValidMoves() {
-		score := -alphaBeta(position.Update(move), -beta, -alpha, depthleft-1)
+		score := -alphaBetaStep(position.Update(move), -beta, -alpha, depthleft-1)
 		if score >= beta {
 			return beta //  fail hard beta-cutoff
 		}
