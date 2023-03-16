@@ -36,17 +36,23 @@ func (tree *SearchTree) AlphaBetaExpand(evalf func(*chess.Position) int, depth i
 		alpha, beta = -beta, -alpha
 	}
 
-	tree.AlphaBetaStep(evalf, alpha, beta, depth)
+	tree.AlphaBetaStep(evalf, alpha, beta, depth, make(map[[16]byte]int))
 }
 
-func (tree *SearchTree) AlphaBetaStep(evalf func(*chess.Position) int, alpha, beta, depth int) int {
+func (tree *SearchTree) AlphaBetaStep(evalf func(*chess.Position) int, alpha, beta, depth int, ttable map[[16]byte]int) int {
 	if depth == 0 {
 		return evalf(tree.position)
 	}
 
 	tree.Expand(1)
 	for _, child := range tree.children {
-		child.eval = -child.AlphaBetaStep(evalf, -beta, -alpha, depth-1)
+		hash := tree.position.Hash()
+		if val, ok := ttable[hash]; ok {
+			child.eval = val
+		} else {
+			child.eval = -child.AlphaBetaStep(evalf, -beta, -alpha, depth-1, ttable)
+			ttable[hash] = child.eval
+		}
 
 		if child.eval >= beta {
 			child.cutoff = true

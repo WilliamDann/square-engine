@@ -9,22 +9,16 @@ func material(position *chess.Position) int {
 		switch p.Type() {
 		case chess.Pawn:
 			value += 100
-			break
 		case chess.Bishop:
 			value += 300
-			break
 		case chess.Knight:
 			value += 300
-			break
 		case chess.Rook:
 			value += 500
-			break
 		case chess.Queen:
 			value += 900
-			break
 		case chess.King:
 			value += 200
-			break
 		}
 		if p.Color() == chess.Black {
 			score -= value
