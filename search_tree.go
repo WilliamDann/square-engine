@@ -20,7 +20,7 @@ func append(tree *SearchTree, value *MoveInfo) *SearchTree {
 	if value.eval >= tree.value.eval {
 		return &SearchTree{tree.value, tree.left, append(tree.right, value)}
 	}
-	return &SearchTree{tree.value, append(tree.left, value), tree.left}
+	return &SearchTree{tree.value, append(tree.left, value), tree.right}
 }
 
 func (tree *SearchTree) Preorder(f func(*MoveInfo)) {

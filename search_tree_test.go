@@ -21,26 +21,7 @@ func TestAppendEmptyTree(t *testing.T) {
 	}
 }
 
-func TestAppendStartingMoves(t *testing.T) {
-	tree := &SearchTree{}
-	added := 0
-	for _, move := range chess.StartingPosition().ValidMoves() {
-		tree = append(tree, &MoveInfo{move, rand.Intn(200) - 100})
-		added++
-	}
-
-	found := 0
-	tree.Inorder(func(mi *MoveInfo) { found++ })
-
-	if added != found {
-		t.Errorf("Added != found: %d != %d", added, found)
-	}
-}
-
-// TODO preorder test
-// TODO postorder test
-
-func TestInorderTraverse(t *testing.T) {
+func TestInorderInOrder(t *testing.T) {
 	tree := &SearchTree{}
 	i := 0
 	for _, move := range chess.StartingPosition().ValidMoves() {
@@ -49,10 +30,66 @@ func TestInorderTraverse(t *testing.T) {
 	}
 
 	last := -1
+	n := 0
 	tree.Inorder(func(mi *MoveInfo) {
 		if mi.eval <= last {
 			t.Errorf("Wrong order: %d", mi.eval)
 		}
 		last = mi.eval
+		n++
 	})
+
+	if n != i {
+		t.Errorf("Added != found: %d != %d", i, n)
+	}
 }
+
+func TestInOrderRandomOrder(t *testing.T) {
+	tree := &SearchTree{}
+	added := 0
+	for _, move := range chess.StartingPosition().ValidMoves() {
+		tree = append(tree, &MoveInfo{move, rand.Intn(200) - 100})
+		added++
+	}
+
+	last := -101
+	n := 0
+	tree.Inorder(func(mi *MoveInfo) {
+		if mi.eval < last {
+			t.Errorf("Wrong order: %d", mi.eval)
+		}
+		last = mi.eval
+		n++
+	})
+
+	if n != added {
+		t.Errorf("Added != found: %d != %d", added, n)
+	}
+}
+
+func TestInorderReverseOrder(t *testing.T) {
+	tree := &SearchTree{}
+	added := 0
+	total := len(chess.StartingPosition().ValidMoves())
+	for _, move := range chess.StartingPosition().ValidMoves() {
+		tree = append(tree, &MoveInfo{move, total - added})
+		added++
+	}
+
+	last := -1
+	n := 0
+	tree.Inorder(func(mi *MoveInfo) {
+		if mi.eval <= last {
+			t.Errorf("Wrong order: %d", mi.eval)
+		}
+		last = mi.eval
+		n++
+	})
+
+	if n != added {
+		t.Errorf("Added != found: %d != %d", added, n)
+	}
+}
+
+// TODO preorder test
+// TODO postorder test
