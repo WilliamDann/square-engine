@@ -13,34 +13,34 @@ type MoveInfo struct {
 }
 
 func append(tree *SearchTree, value *MoveInfo) *SearchTree {
-	if tree.value == nil {
+	if tree == nil || tree.value == nil {
 		return &SearchTree{value, nil, nil}
 	}
 
 	if value.eval >= tree.value.eval {
-		return append(tree.left, value)
+		return &SearchTree{tree.value, tree.left, append(tree.right, value)}
 	}
-	return append(tree.right, value)
+	return &SearchTree{tree.value, append(tree.left, value), tree.left}
 }
 
-func (tree SearchTree) Preorder(f func(*MoveInfo)) {
-	if tree.value != nil {
+func (tree *SearchTree) Preorder(f func(*MoveInfo)) {
+	if tree != nil && tree.value != nil {
 		f(tree.value)
 		tree.left.Preorder(f)
 		tree.right.Preorder(f)
 	}
 }
 
-func (tree SearchTree) Inorder(f func(*MoveInfo)) {
-	if tree.value != nil {
+func (tree *SearchTree) Inorder(f func(*MoveInfo)) {
+	if tree != nil && tree.value != nil {
 		tree.left.Inorder(f)
 		f(tree.value)
 		tree.right.Inorder(f)
 	}
 }
 
-func (tree SearchTree) Postorder(f func(*MoveInfo)) {
-	if tree.value != nil {
+func (tree *SearchTree) Postorder(f func(*MoveInfo)) {
+	if tree != nil && tree.value != nil {
 		tree.left.Postorder(f)
 		tree.right.Postorder(f)
 		f(tree.value)
